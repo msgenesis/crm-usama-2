@@ -113,6 +113,10 @@ router.post('/createUser',ensureAuth,(req,res,next)=>{
 
 }) 
 
+router.get('/getUser',(req, res , next)=>{
+  res.send(req.user)
+
+})
 
 router.get('/adminInquire',(req,res,next)=>{ // ensureAuth
     Sale.count({},function(err,totalSale){
@@ -268,6 +272,21 @@ router.patch("/users/:id", async (req, res) => {
         res.send(sale)
     })
     })
+
+    router.get("/ViewStatus", function(req, res, next) {
+      Sale.findOne({ _id: req.query.id })
+        .populate("_Agent", {  "_id": 1, "username": 1, "role": 1})
+        .populate("_Closer",{  "_id": 1, "username": 1, "role": 1})
+        .select({_Agent:1,_Closer:1,_id:1})
+        .exec(function(err, sale) {
+          if (err) {
+            res.send({ error: true });
+            return;
+          }
+          res.send(sale);
+        });
+    });  
+
     router.post("/signup", function (req, res, next) {
 
       var username = req.body.username;

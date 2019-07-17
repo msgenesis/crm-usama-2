@@ -6,6 +6,7 @@ import { Login, Page404 } from './Pages';
 // import { connect } from 'react-redux';
 // import { getUserRole, logOut } from './store/Actions/action'
 import Loader from './assets/img/loader.gif'
+import axios from 'axios'
 import history from './history'
 // import publicIp from 'public-ip'
 //***************Agent Route*******************/
@@ -26,39 +27,56 @@ import SignUp from './Pages/Login/Signup';
 //   databaseURL: "https://genesis-7c1cc.firebaseio.com"
 // });
 
-// function PrivateRoute({ component: Component, authed, ...rest }) {
-//   return (
-//     <Route
-//       {...rest}
-//       render={(props) => authed === true
-//         ? <Component {...props} />
-//         : <Redirect to={{ pathname: '/', state: { from: props.location } }} />}
-//     />
-//   )
-// }
+function PrivateRoute({ component: Component, authed = true, ...rest }) {
+  return (
+    <Route
+      {...rest}
+      render={props =>
+        authed === true ? (
+          <Component {...props} />
+        ) : (
+          <Redirect to={{ pathname: "/", state: { from: props.location } }} />
+        )
+      }
+    />
+  );
+}
 
-// function PublicRoute({ component: Component, authed, ...rest }) {
-//   return (
-//     <Route
-//       {...rest}
-//       render={(props) => authed === false
-//         ? <Component {...props} />
-//         : <Redirect to='/dashboard' />}
-//     />
-//   )
-// }
+function PublicRoute({ component: Component, authed, ...rest }) {
+  return (
+    <Route
+      {...rest}
+      render={props =>
+        authed === false ? (
+          <Component {...props} />
+        ) : (
+          <Redirect to="/dashboard" />
+        )
+      }
+    />
+  );
+}
 
 class MainRouter extends Component {
   constructor(props) {
     super(props)
     this.state = {
       authed: false,
-      user: "",
+      user: {},
       loader: true
     }
     this.userCheck = this.userCheck.bind(this)
   }
-  // componentDidMount() {
+  componentDidMount() {
+
+    axios.get("/getUser")
+      .then(res => {
+        this.setState({user:res.data})
+        console.log(res.data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   //   let that = this
   //   firebase.auth().onAuthStateChanged(function (user) {
   //     if (user) {
@@ -72,18 +90,18 @@ class MainRouter extends Component {
   //       })
   //     }
   //   });
-  // }
+  }
   componentWillMount() {
     // this.props.getUserRole();
   }
 
-  userCheck(fruit) {
-    console.log("Chekingg===>",fruit)
-    if (fruit.uid === this.state.user.uid) {
-      return fruit.uid === this.state.user.uid;
+  userCheck(user) {
+    console.log("Chekingg===>",user)
+    if (user.uid === this.state.user.uid) {
+      return user.uid === this.state.user.uid;
     }
     else {
-      return fruit.uid === this.state.user.uid;
+      return user.uid === this.state.user.uid;
     }
   }
   render() {
@@ -92,7 +110,8 @@ class MainRouter extends Component {
     //     this.props.logOut()
     //   }
     // })
-    console.log('User',this.props.admins)
+    const { authed, user, loader } = this.state;
+    console.log('User',user)
     return (
       this.props.mainLoader === true ?
         <div className="loader">
@@ -101,24 +120,24 @@ class MainRouter extends Component {
         </div>
         :
         <Router>
-          <Switch>
+          <Switch>*/}
          {/* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ADMIN WORKING ROUTES WITH NODES <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */}
          
-         <Route exact path="/all-users" component={EditUserDefault} />
+         {/* <Route exact path="/all-users" component={EditUserDefault} />
          <Route exact path="/today-sales" component={TodaySellDefaultAdmin} />
          <Route exact path="/all-sale" component={AllSellDefaultAdmin}/>
          <Route exact path="/register" component={RegisterDefault} />
-        <Route exact path="/adminDashboard" component={DashboardDefaultAdmin}/> 
-       
+         <Route exact path="/adminDashboard" component={DashboardDefaultAdmin}/> 
+        */}
          {/* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CLOSER WORKING ROUTES WITH NODES <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */}
-         <Route  path="/" exact component={Login}/> 
+         {/* <Route  path="/" exact component={Login}/>  */}
         {/* <Route  exact   path="/dashboard1" component={DashboardDefaultCloser} />
         <Route  exact   path="/new-sale" component={NewDealDefaultCloser}/>
         <Route  exact   path="/today-sales" component={TodaySellDefaultCloser}/>
         <Route  exact   path="/all-sale" component={AllSellDefaultCloser}/>
         <Route  exact   path="/pending" component={PendingDefaultCloser}/>
         <Route  exact   path="/transfer" component={TransferDefaultCloser}/>
-      <Route  exact   path="/call-back" component={CallBackDefaultCloser}/>  */}
+        <Route  exact   path="/call-back" component={CallBackDefaultCloser}/>  */}
 
 
 
@@ -127,16 +146,16 @@ class MainRouter extends Component {
 
       {/* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> AGENT WORKING ROUTES WITH NODES <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */}
   
-                      <Route  path="/" exact component={Login}/> 
+                      {/* <Route  path="/" exact component={Login}/>  */}
                     {/*  <Route exact path="/adminDashboard" component={DashboardDefaultAdmin} />
                       <Route exact path="/today-sales" component={TodaySellDefaultAdmin} />
                       <Route exact path="/register" component={RegisterDefault} />
-                      <Route exact             path="/dashboard" component={DashboardDefault}  />
-                      <Route exact             path="/new-sale" component={NewDealDefault}     />
+                      <Route exact path="/dashboard" component={DashboardDefault}  />
+                      <Route exact path="/new-sale" component={NewDealDefault}     />
                       
-*/}
+                    */}
 
-                      <Route  path="/signup" exKUact component={SignUp}/>  
+                      {/* <Route  path="/signup" exact component={SignUp}/>   */}
                        {/*<Route exact             path="/dashboard" component={DashboardDefault}  />
                       <Route exact             path="/new-sale" component={NewDealDefault}     />
                       <Route exact             path="/today-sales" component={TodaySellDefault}/>
@@ -147,49 +166,49 @@ class MainRouter extends Component {
 
 
 
-
-            {/* <Route exact path="/" render={() => <Redirect to="/login" />} /> */}
-            {/* <PublicRoute authed={this.state.authed} path="/login" component={Login} /> */}
-            {/* {typeof this.props.admins.find(this.userCheck) !== "undefined" ?
+            <Route exact path="/signup"  component={SignUp}/>  
+            <Route exact path="/" render={() => <Redirect to="/login" />} /> 
+            <PublicRoute authed={!!user.role} path="/login" component={Login} />
+            { user.role === "Admin" ?
            
            //=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Admin<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
               <Switch>
-                <PrivateRoute authed={this.state.authed} path="/dashboard"   component={DashboardDefaultAdmin} />
-                <PrivateRoute authed={this.state.authed} path="/all-sale"    component={AllSellDefaultAdmin} />
-                <PrivateRoute authed={this.state.authed} path="/today-sales" component={TodaySellDefaultAdmin} />
-                <PrivateRoute authed={this.state.authed} path="/register"    component={RegisterDefault} />
-                <PrivateRoute authed={this.state.authed} path="/all-users"   component={EditUserDefault} />
+                <PrivateRoute authed={!!user.role} path="/dashboard"   component={DashboardDefaultAdmin} />
+                <PrivateRoute authed={!!user.role} path="/all-sale"    component={AllSellDefaultAdmin} />
+                <PrivateRoute authed={!!user.role} path="/today-sales" component={TodaySellDefaultAdmin} />
+                <PrivateRoute authed={!!user.role} path="/register"    component={RegisterDefault} />
+                <PrivateRoute authed={!!user.role} path="/all-users"   component={EditUserDefault} />
                 <Route path="*" component={Page404} />
               </Switch>
               :
-              typeof this.props.closers.find(this.userCheck) !== "undefined" ?
+              user.role === "Closer" ?
                 //=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Closers<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 <Switch>
-                  <PrivateRoute authed={this.state.authed} path="/dashboard" component={DashboardDefaultCloser} />
-                  <PrivateRoute authed={this.state.authed} path="/new-sale" component={NewDealDefaultCloser} />
-                  <PrivateRoute authed={this.state.authed} path="/today-sales" component={TodaySellDefaultCloser} />
-                  <PrivateRoute authed={this.state.authed} path="/all-sale" component={AllSellDefaultCloser} />
-                  <PrivateRoute authed={this.state.authed} path="/pending" component={PendingDefaultCloser} />
-                  <PrivateRoute authed={this.state.authed} path="/transfer" component={TransferDefaultCloser} />
-                  <PrivateRoute authed={this.state.authed} path="/call-back" component={CallBackDefaultCloser} />
+                  <PrivateRoute authed={!!user.role} path="/dashboard" component={DashboardDefaultCloser} />
+                  <PrivateRoute authed={!!user.role} path="/new-sale" component={NewDealDefaultCloser} />
+                  <PrivateRoute authed={!!user.role} path="/today-sales" component={TodaySellDefaultCloser} />
+                  <PrivateRoute authed={!!user.role} path="/all-sale" component={AllSellDefaultCloser} />
+                  <PrivateRoute authed={!!user.role} path="/pending" component={PendingDefaultCloser} />
+                  <PrivateRoute authed={!!user.role} path="/transfer" component={TransferDefaultCloser} />
+                  <PrivateRoute authed={!!user.role} path="/call-back" component={CallBackDefaultCloser} />
                   <Route path="*" component={Page404} />
                 </Switch>
                 :
-                typeof this.props.agents.find(this.userCheck) !== "undefined" ?
+                user.role === "Agent" ?
                   //=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Agent<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                   <Switch>
-                    <PrivateRoute authed={this.state.authed} path="/dashboard" component={DashboardDefault}    />
-                    <PrivateRoute authed={this.state.authed} path="/new-sale" component={NewDealDefault}        />
-                    <PrivateRoute authed={this.state.authed} path="/today-sales" component={TodaySellDefault}    />
-                    <PrivateRoute authed={this.state.authed} path="/all-sale" component={AllSellDefault}           />
-                    <PrivateRoute authed={this.state.authed} path="/pending" component={PendingDefault}             />
-                    <PrivateRoute authed={this.state.authed} path="/transfer" component={TransferDefault}           />
-                    <PrivateRoute authed={this.state.authed} path="/call-back" component={CallBackDefault}           />
+                    <PrivateRoute authed={!!user.role} path="/dashboard" component={DashboardDefault}    />
+                    <PrivateRoute authed={!!user.role} path="/new-sale" component={NewDealDefault}        />
+                    <PrivateRoute authed={!!user.role} path="/today-sales" component={TodaySellDefault}    />
+                    <PrivateRoute authed={!!user.role} path="/all-sale" component={AllSellDefault}           />
+                    <PrivateRoute authed={!!user.role} path="/pending" component={PendingDefault}             />
+                    <PrivateRoute authed={!!user.role} path="/transfer" component={TransferDefault}           />
+                    <PrivateRoute authed={!!user.role} path="/call-back" component={CallBackDefault}           />
                     <Route path="*" component={Page404} />
                   </Switch>
                   :
                   history.push("/login")
-            } */}
+            }
           </Switch>
         </Router>
     );
