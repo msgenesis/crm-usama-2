@@ -17,10 +17,10 @@ function ensureAuth(req,res,next){
     res.status(401).send('Un authenticated')
   }
 }
-router.get('/accessIps',function(req,res,next){
-  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  console.log(ip)
-})
+// router.get('/accessIps',function(req,res,next){
+//   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+//   console.log(ip)
+// })
 
 router.get('/all-user', async (req ,res) =>{
   try{

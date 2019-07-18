@@ -6,6 +6,7 @@ var bodyParser = require("body-parser");
 const session = require("express-session");
 const helmet = require("helmet");
 const normalRoutes = require("./routes/normalRoutes");
+const accessip = require("./routes/accessip");
 var mongoose = require("mongoose");
 const setuppassport = require("./passport/setuppassport");
 var cookieParser = require("cookie-parser");
@@ -54,6 +55,7 @@ app.use((req, res, next) => {
 app.use(session(sess));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(accessip)
 app.use(normalRoutes);
 
 app.listen(4000, () => {

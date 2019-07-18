@@ -15,7 +15,7 @@ const accessIpSchema = new mongoose.Schema({
     },
     _User: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref: 'User'
       }
 })
