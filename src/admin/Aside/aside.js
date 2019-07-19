@@ -4,7 +4,8 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { AppSwitch } from '@coreui/react'
 import Agent from '../../assets/img/brand/agent.png'
-import firebase from '../../Config/Firebase/firebase'
+import axios from 'axios'
+// import firebase from '../../Config/Firebase/firebase'
 // import admin from 'firebase-admin-auth';
 import './style.css'
 const propTypes = {
@@ -24,7 +25,7 @@ class AdminDefaultAside extends Component {
             AllUsers: [],
             checked: false,
             ip: "",
-            ipList: []
+            ipList:{ip:[]}
         };
         this.toggle = this.toggle.bind(this);
         this.getIP = this.getIP.bind(this);
@@ -37,7 +38,7 @@ class AdminDefaultAside extends Component {
             });
         }
     }
-    // componentDidMount(nextPageToken) {
+    componentDidMount(nextPageToken) {
     //     var today = new Date();
     //     var date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
     //     firebase.database().ref('/').child(`AgentAvtivity/${date}`).on('value', (data) => {
@@ -67,8 +68,8 @@ class AdminDefaultAside extends Component {
     //         .catch(function (error) {
     //             console.log("Error listing users:", error);
     //         });
-    //     this.getIP()
-    // }
+        this.getIP()
+    }
 
 
     handleChange(i, checked, uid) {
@@ -79,7 +80,7 @@ class AdminDefaultAside extends Component {
                 disabled: true
             })
                 .then(function (userRecord) {
-                    firebase.database().ref("blacklist").child(uid).set(true);
+                    // firebase.database().ref("blacklist").child(uid).set(true);
                 })
                 .catch(function (error) {
                     console.log("Error updating user:", error);
@@ -89,7 +90,7 @@ class AdminDefaultAside extends Component {
                 disabled: false
             })
                 .then(function (userRecord) {
-                    firebase.database().ref("blacklist").child(uid).set(false);
+                    // firebase.database().ref("blacklist").child(uid).set(false);
                 })
                 .catch(function (error) {
                     console.log("Error updating user:", error);
@@ -98,36 +99,71 @@ class AdminDefaultAside extends Component {
         }
     }
     getIP() {
-        firebase.database().ref('/').child(`AccessIP`).on('child_added', (data) => {
-                this.state.ipList.push(data.val())
-                this.setState({
-                    ipList: this.state.ipList
-                })
+        // firebase.database().ref('/').child(`AccessIP`).on('child_added', (data) => {
+        //         this.state.ipList.push(data.val())
+        //         this.setState({
+        //             ipList: this.state.ipList
+        //         })
+        // })
+        axios.get('/accessIp')
+        .then( res => {
+          this.setState({ipList:res.data})
+          console.log(res.data)
         })
+        .catch( err =>{
+          console.log(err)
+        });
+      
     }
     addNewIp() {
-        let ip = this.state.ip;
+        let {ipList,ip} =this.state
         if (ip !== "") {
-            let format = ip.split('.').join('');
-            firebase.database().ref('/').child(`AccessIP/${format}`).set({ ip: this.state.ip, access: true })
-                .then(() => {
-                    this.setState({
-                        ip: ""
-                    })
-                })
+        ipList.ip.push(ip)
+        this.setState({ipList})
+        
+        axios.patch(`/accessIp/${ipList._id}`,{
+           ip: ipList.ip
+        })
+        .then( res =>{
+            console.log(res)
+        })
+        .catch( err => {
+            console.log(err)
+        });
+            // firebase.database().ref('/').child(`AccessIP/${format}`).set({ ip: this.state.ip, access: true })
+            //     .then(() => {
+            //         this.setState({
+            //             ip: ""
+            //         })
+            //     })
         }
     }
-    deleteIP(ip, i) {
-        let format = ip.split('.').join('');
-        firebase.database().ref('/').child(`AccessIP/${format}`).remove();
-        this.state.ipList.splice(i, 1)
-        this.setState({
-            ipList: this.state.ipList
-        })
+    deleteIP(id) {
+        // let format = ip.split('.').join('');
+        // firebase.database().ref('/').child(`AccessIP/${format}`).remove();
+        // this.state.ipList.splice(i, 1)
+        // this.setState({
+        //     ipList: this.state.ipList
+        // })
+        let {ipList} =this.state
+        const newip= ipList.ip.filter((ip,i)=> i!==id )
+        ipList.ip =newip
+        this.setState({ipList})
+
+        axios.patch(`/accessIp/${ipList._id}`,{
+            ip: ipList.ip
+         })
+         .then( res =>{
+             console.log(res)
+         })
+         .catch( err => {
+             console.log(err)
+         });
     }
     render() {
         // eslint-disable-next-line
         const { children, ...attributes } = this.props;
+        console.log(this.state)
         return (
             <React.Fragment>
                 <Nav tabs>
@@ -222,10 +258,10 @@ class AdminDefaultAside extends Component {
                             <input type="text" className="format" value={this.state.ip} onChange={(e) => { this.setState({ ip: e.target.value }) }} />
                             <Button onClick={this.addNewIp.bind(this)} style={{ marginTop: 10, float: "right", width: "100%" }} size="sm" color={'outline-dark'}><i className="fa fa-ip"></i> Add IP</Button>
                             <div style={{ marginTop: 50 }}>
-                                {this.state.ipList.map((v, i) => {
+                                {    this.state.ipList.ip.map((v, i) => {
                                     return <div key={i} style={{ border: '1px solid green', padding: '5px',marginTop: 5 }}>
-                                        {v.ip}
-                                        <i onClick={this.deleteIP.bind(this, v.ip, i)} style={{ float: "right", fontSize: 18, color: "red", cursor: "pointer" }} className="icon-trash"></i>
+                                        {v}
+                                        <i onClick={this.deleteIP.bind(this,i)} style={{ float: "right", fontSize: 18, color: "red", cursor: "pointer" }} className="icon-trash"></i>
                                     </div>
                                 })
                                 }

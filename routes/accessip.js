@@ -48,11 +48,11 @@ router.patch("/accessIp/:id", async (req, res) => {
   const isValidOperation = updates.every(update =>
     allowedUpdates.includes(update)
   );
-
+  console.log("from the server", isValidOperation);
   if (!isValidOperation) {
     return res.status(400).send({ error: "Invalid Updates" });
   }
-  console.log(req.body.ip);
+
   try {
     await AccessIp.findByIdAndUpdate(req.params.id, { ip: req.body.ip });
     // const user = await User.findByIdAndUpdate(req.params.id,req.body,{ new:true , runValidators:true})
