@@ -79,10 +79,23 @@ const saleSchema = new mongoose.Schema(
       default: "Select"
     },
     MonthlyRentMortgage: { type: Number },
-    Agent: {
+    AgentId: {
       type: mongoose.Schema.Types.ObjectId,
       required: false, // this would be true 
       ref: "User"
+    },
+    _Closer: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false, // this would be true 
+      ref: "User"
+    },
+    _SaleStatus: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false, // this would be true 
+      ref: "SaleStatus"
+    },
+    _TransferBy:{
+      type:String
     }
   },
   { timestamps: true }

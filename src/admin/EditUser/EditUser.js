@@ -40,7 +40,6 @@ import axios from 'axios';
             saleUser: ""
         }
         // this.downloadSale = this.downloadSale.bind(this)
-
     }
 
 
@@ -169,6 +168,19 @@ import axios from 'axios';
           });
     }
 
+    AgentSales(id,username){
+        console.log("id of agent",id)
+        axios.get(`/AgentSales/${id}`)
+        .then( (response) => {
+            // response.data.map(v => v.Modal = "none") // this patch is to remove Edit User Modal on Every User Render
+            // this.setState({AllUsers: response.data})
+            this.setState({ viewSaleModal: "block", viewSale: response.data, saleUser: username })
+         })
+         .catch( (error) =>{
+         console.log(error);
+        });
+    }
+
     render() {
         return (
             <div className="animated fadeIn">
@@ -274,16 +286,16 @@ import axios from 'axios';
                                     <td>
                                         <div className="clearfix">
                                             <div className="float-left"></div>
-                                            <Button color="outline-primary" onClick={() => this.setState({ viewSaleModal: "block", viewSale: v.Sales, saleUser: v.displayName })}><i className="fa fa-eye"></i>{" "}View Sales</Button>
+                                            <Button color="outline-primary" onClick={this.AgentSales.bind(this,v._id,v.username)}><i className="fa fa-eye"></i>{" "}View Sales</Button>
                                         </div>
                                     </td>
                                     <td>
-                                        <Workbook filename={v.displayName + ".xlsx"} element={<div className="clearfix">
+                                        <Workbook filename={v.username + ".xlsx"} element={<div className="clearfix">
                                             <div className="float-left"></div>
                                             <Button color="outline-success" onClick={() => {
                                             }}><i className="fa fa-download"></i>{" "}Download</Button>
                                         </div>}>
-                                            <Workbook.Sheet data={v.Sales} name="Sheet A">
+                                            <Workbook.Sheet data={v.viewSale} name="Sheet A">
                                             <Workbook.Row>
                                                 <Workbook.Column label="ID" value="ID" />
                                             </Workbook.Row>
@@ -341,16 +353,15 @@ import axios from 'axios';
                                                 </thead>
                                                 <tbody>
                                                     {this.state.viewSale.map((v, i) => {
-                                                        console.log(v)
                                                         return (
                                                             <tr key={i}>
                                                                 <td>{v._id}</td>
-                                                                <td>{v.fullName}</td>
-                                                                <td>{v.phone}</td>
-                                                                <td>{v.time}</td>
-                                                                <td>{v.date}</td>
-                                                                <td title={v.status.statusAdmin === "Call Back" ? v.status.callbackDate + " " + v.status.callbackTime : ""}>
-                                                                    <Badge style={{ width: 100, height: 25, paddingTop: 7, backgroundColor: v.status.status === "Pending" ? '#ffab00' : v.status.status === "Transfer" ? '#e4e5e6' : v.status.status === "Kick Back" ? "#ff7043" : v.status.status === "Dublicated" ? "#ff8a65" : v.status.status === "Approved" ? '#4caf50' : v.status.status === "Rejected" ? "#d32f2f" : '#81d4fa' }}><i className={v.status.status === "Pending" ? "fa fa-spinner" : v.status.status === "Transfer" ? "fa fa-exchange" : v.status.status === "Kick Back" ? "fa fa-backward" : v.status.status === "Dublicated" ? "fa fa-clone" : v.status.status === "Approved" ? "fa fa-check" : v.status.status === "Rejected" ? "fa fa-exclamation-triangle" : "fa fa-phone"}></i>{v.status.status === "Call Back" ? <i className="fa fa-clock"></i> : " "} {v.status.status}</Badge>
+                                                                <td>{v.FullName}</td>
+                                                                <td>{v.ContactNumber}</td>
+                                                                <td>{v.Time}</td>
+                                                                <td>{v.Date}</td>
+                                                                <td title={v.Status === "Call Back" ? v.Status + " " + v.Status : ""}>
+                                                                    <Badge style={{ width: 100, height: 25, paddingTop: 7, backgroundColor: v.Status === "Pending" ? '#ffab00' : v.Status === "Transfer" ? '#e4e5e6' : v.Status === "Kick Back" ? "#ff7043" : v.Status === "Dublicated" ? "#ff8a65" : v.Status === "Approved" ? '#4caf50' : v.Status === "Rejected" ? "#d32f2f" : '#81d4fa' }}><i className={v.Status === "Pending" ? "fa fa-spinner" : v.Status === "Transfer" ? "fa fa-exchange" : v.Status === "Kick Back" ? "fa fa-backward" : v.Status === "Dublicated" ? "fa fa-clone" : v.Status === "Approved" ? "fa fa-check" : v.Status === "Rejected" ? "fa fa-exclamation-triangle" : "fa fa-phone"}></i>{v.Status === "Call Back" ? <i className="fa fa-clock"></i> : " "} {v.Status}</Badge>
                                                                 </td>
                                                                 <td>
                                                                     <Workbook filename={v._id + ".xlsx"} element={<div className="clearfix">

@@ -22,6 +22,8 @@ function ensureAuth(req,res,next){
 //   console.log(ip)
 // })
 
+
+
 router.get('/all-user', async (req ,res) =>{
   try{
     const users = await User.find({})
@@ -30,6 +32,8 @@ router.get('/all-user', async (req ,res) =>{
     res.status(500).send(e)
 }
 })
+
+
 router.get("/all-sales", async (req, res) => {
   try {
     const sales = await Sale.find({});
@@ -50,6 +54,15 @@ router.get("/salesBy/:status", async (req, res) => {
     res.status(500).send({error:true});
   }
 });
+
+router.get('/AgentSales/:id', async (req ,res) =>{
+  console.log("allow id", req.params)
+  
+    const sales = await Sale.find({Agent: req.params.id}).select({_id:1, Status:1,FullName:1,ContactNumber:1,updatedAt:1});
+    const SalesWithTime = sales.map(s=>({...s._doc,Time:new Date(s.updatedAt).toLocaleTimeString() , Date:new Date(s.updatedAt).toLocaleDateString()}))
+    res.send(SalesWithTime);
+  
+})
 
 
 router.post('/sale', async (req,res,next)=>{
