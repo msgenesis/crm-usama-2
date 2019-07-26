@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import mongoose from "mongoose";
 import {
     Col,
     Row,
@@ -128,39 +129,52 @@ class CallBack extends Component {
             CloserNotes: " ",
             SSNError: "",
             SSNBorder: "",
+            admins:[]
         }
         this.reset = this.reset.bind(this)
         this.searchUpdated = this.searchUpdated.bind(this)
 
     }
     componentDidMount() {
+        let {transferModal} = this.state
         axios.get("/salesBy/Call Back")
         .then(res=> {
-            this.setState({data: res.data})
-            console.log(res)
+            res.data.map(()=>transferModal.push({ display: "none" }))
+            this.setState({
+                data: res.data,
+                transferModal
+            })
+            console.log(res.data)
         })
-    //     var today = new Date();
-    //     var date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
-    //     firebase.auth().onAuthStateChanged(function (user) {
-    //         if (user) {
-    //             if (user.email === "admin@genesis.com") {
+        
+        axios.get("/Users/Admin")
+        .then(res=> {
+            this.setState({
+                admins: res.data
+            })
+            console.log(res.data)
+        })
 
-    //             }
-    //             else {
-    //                 $(window).blur(function () {
-    //                     // console.log('blur')
-    //                     firebase.database().ref('/').child(`AgentAvtivity/${date}/${user.uid}/status`).set("invisible")
-    //                 });
-    //                 $(window).focus(function () {
-    //                     // console.log('focus')
-    //                     firebase.database().ref('/').child(`AgentAvtivity/${date}/${user.uid}/status`).set("online")
-    //                 });
-    //             }
+        // var today = new Date();
+        // var date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+        // firebase.auth().onAuthStateChanged(function (user) {  
+        //     if (user) {
+        //         if (user.email === "admin@genesis.com") {
 
-    //         } else {
+        //         }
+        //         else {
+        //             $(window).blur(function () {
+        //                 // console.log('blur')
+        //                 firebase.database().ref('/').child(`AgentAvtivity/${date}/${user.uid}/status`).set("invisible")
+        //             });
+        //             $(window).focus(function () {
+        //                 // console.log('focus')
+        //                 firebase.database().ref('/').child(`AgentAvtivity/${date}/${user.uid}/status`).set("online")
+        //             });
+        //         }
 
-    //         }
-    //     });
+        //     }
+        // });
     }
 
     updateDeal() {
@@ -328,6 +342,8 @@ class CallBack extends Component {
     //     let agent = "Agent"
     //     this.props.getUser(user, agent)
     // }
+
+
     // handleBlur() {
     //     var is_valid = luhn.validate(this.state.cc);
     //     fetch(`https://lookup.binlist.net/${this.state.cc}`)
@@ -381,6 +397,8 @@ class CallBack extends Component {
     //         })
     //     }
     // }
+
+
     saveCard() {
         let { data, bankName, bankNumber, nameOnCard, cc, cvc, exp, cardExpire, bal, aval, lastPay, duePay, aprl, cardScheme } = this.state;
         var is_valid = luhn.validate(cc);
@@ -625,12 +643,51 @@ class CallBack extends Component {
         })
         this.reset()
     }
-    saleTransfer(admin, i) {
+    saleTransfer(admin, id,i) {
         let { data, transferPassword } = this.state;
-        var today = new Date();
+
+        console.log(id)
+
+        this.setState({
+            transferErrorDisplay: "none"
+        })
+        
+        axios.post(`/AuthUser`,{
+            transferPassword
+         })
+         .then( res =>{
+             console.log("success",res)
+
+             axios.patch(`/Transfer/${id}`,{
+                Status:"Transfer",
+                AdminStatus: "Pending",
+                CloserStatus: "Transfer",
+                AdminId: mongoose.Types.ObjectId(admin._id)
+             })
+             .then( res =>{
+                 console.log(res)
+                 data.splice(i, 1);
+                this.setState({data: data});
+             })
+             .catch( err => {
+                 console.log(err)
+             });
+         })
+         .catch( err => {
+             console.log(err)
+             this.setState({
+                transferErrorDisplay: "block",
+                transferErrorMessage: "Incorrect password !"
+            })
+         });
+        
+       
+
+
+
         // let user = firebase.auth().currentUser;
-        let that = this;
-        var date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+        // let that = this;
+        // var date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
         // if (typeof admin === 'undefined' || transferPassword === "") {
         //     this.setState({
         //         transferErrorDisplay: "block"
@@ -677,6 +734,8 @@ class CallBack extends Component {
         //         });
         // }
     }
+
+
     componentWillUnmount() {
         this._isMounted = false;
     }
@@ -761,6 +820,7 @@ class CallBack extends Component {
         })
     }
     transferModalOpen(i) {
+        console.log(i)
         let { transferModal } = this.state;
         transferModal[i].display = "block"
         this.setState({
@@ -780,28 +840,46 @@ class CallBack extends Component {
     searchUpdated(term) {
         this.setState({ searchTerm: term })
     }
-    kickBack(transferAgentID, transferAgentName, key, transferCloserID, transferCloserName, date, saleDate, i) {
-        return
-        let { data, CloserNotes } = this.state;
-        var today = new Date();
-        var dateToday = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
-        // console.log(transferAgentID, transferAgentName, key, transferCloserID, transferCloserName, date, i)
-        let status = {
-            status: "Kick Back",
-            statusFromCloser: "Kick Back",
-            callbackDate: "",
-            callbackTime: "",
-            transferCloserID: transferCloserID,
-            transferCloserName: transferCloserName,
-            transferAgentID: transferAgentID,
-            transferAgentName: transferAgentName,
-            transferDate: date
-        }
-        data[i].status = status;
-        data[i].CloserNotes = CloserNotes;
-        this.setState({
-            data: this.state.data
+    kickBack(transferAgentID = "5d3964fa7a757f1e04c4431c", id, transferCloserID, date, saleDate, i) {
+        
+        console.log(id)
+        
+        axios.patch(`/KickBack/${id}`,{
+            AgentId:  mongoose.Types.ObjectId('5d3964fa7a757f1e04c4431c') ,
+            CloserId: mongoose.Types.ObjectId('5d39653b7a757f1e04c44320') ,
+            Status:"Kick Back",
+            CloserStatus:"Kick Back"
         })
+        .then( res =>{
+                let data = [...this.state.data];
+                data.splice(i, 1);
+                this.setState({data: data});
+            console.log(res)
+        })
+        .catch( err => {
+            console.log(err)
+        });
+
+        // let { data, CloserNotes } = this.state;
+        // var today = new Date();
+        // var dateToday = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+        // // console.log(transferAgentID, transferAgentName, key, transferCloserID, transferCloserName, date, i)
+        // let status = {
+        //     status: "Kick Back",
+        //     statusFromCloser: "Kick Back",
+        //     callbackDate: "",
+        //     callbackTime: "",
+        //     transferCloserID: transferCloserID,
+        //     transferCloserName: transferCloserName,
+        //     transferAgentID: transferAgentID,
+        //     transferAgentName: transferAgentName,
+        //     transferDate: date
+        // }
+        // data[i].status = status;
+        // data[i].CloserNotes = CloserNotes;
+        // this.setState({
+        //     data: this.state.data
+        // })
         // firebase.database().ref('/').child(`NewDeals/${dateToday}/${transferAgentID}/${key}`).set(this.state.data[i])
         //     .then(() => {
         //         data.splice(i, 1)
@@ -854,7 +932,7 @@ class CallBack extends Component {
                                     </thead>
                                     <tbody>
                                         {filter.map((v, i) => {
-                                            // let { transferAgentID, transferAgentName, transferCloserID, transferCloserName, transferDate } = v.status;
+                                            let { transferAgentID, transferCloserID, transferDate } = ["","",""];
                                             return (
                                                 <tr key={i}>
                                                     <td>{v._id}</td>
@@ -877,18 +955,18 @@ class CallBack extends Component {
                                                         { v.Status === "Transfer" ?
                                                             <Button title={"Own"} size="sm" color={'outline-dark'} disabled><i className="fa fa-exclamation-circle"></i> Disabled</Button>
                                                             :
-                                                            // <Button title={`To ${v.Status}`} size="sm" color={'outline-danger'} onClick={this.kickBack.bind(this, transferAgentID, transferAgentName, v.key, transferCloserID, transferCloserName, transferDate, v.date, i)}><i className="fa fa-backward"></i> Kick Back</Button>
-                                                            <Button title={`To ${v.Status}`} size="sm" color={'outline-danger'} onClick={()=>{}}><i className="fa fa-backward"></i> Kick Back</Button>
+                                                            <Button title={`To ${v.Status}`} size="sm" color={'outline-danger'} onClick={this.kickBack.bind(this, transferAgentID, v._id, transferCloserID, transferDate, v.date, i)}><i className="fa fa-backward"></i> Kick Back</Button>
+                                                            // <Button title={`To ${v.Status}`} size="sm" color={'outline-danger'} onClick={()=>{}}><i className="fa fa-backward"></i> Kick Back</Button>
                                                         }
                                                     </td>                                                    {v.Status === "Transfer" ?
                                                         <td style={{ textDecoration: "underline" }}><Button title={"To " + v.Status} size="sm" color={'dark'} disabled><i className="fa fa-check"></i> Transferred</Button></td>
                                                         :
                                                         <td>
                                                             <Button size="sm" color={'outline-success'} onClick={this.transferModalOpen.bind(this, i)}><i className="fa fa-exchange"></i> Transfer</Button>
-                                                            {/* <div id="transferModal" className="modal" style={{ position: 'fixed', zIndex: 1, paddingTop: '100px', left: 0, top: 0, right: 0, width: '40%', height: '100%', overflow: 'auto', margin: "0 auto", marginTop: "90px", display: this.state.transferModal[i].display }}> */}
-                                                            <div id="transferModal" className="modal" style={{ position: 'fixed', zIndex: 1, paddingTop: '100px', left: 0, top: 0, right: 0, width: '40%', height: '100%', overflow: 'auto', margin: "0 auto", marginTop: "90px", display: 'none' }}>
+                                                            <div id="transferModal" className="modal" style={{ position: 'fixed', zIndex: 1, paddingTop: '100px', left: 0, top: 0, right: 0, width: '40%', height: '100%', overflow: 'auto', margin: "0 auto", marginTop: "90px", display: this.state.transferModal[i].display }}>
+                                                            {/* <div id="transferModal" className="modal" style={{ position: 'fixed', zIndex: 1, paddingTop: '100px', left: 0, top: 0, right: 0, width: '40%', height: '100%', overflow: 'auto', margin: "0 auto", marginTop: "90px", display: 'none' }}> */}
                                                                 <div className="modal-content">
-                                                                    <div><p style={{ float: 'left', marginTop: 5 }}><b>ID#{v.ID}</b></p><p style={{ float: 'right' }} className="close" onClick={this.onTransferCLose.bind(this, i)}>&times;</p></div>
+                                                                    <div><p style={{ float: 'left', marginTop: 5 }}><b>ID#{v._id}</b></p><p style={{ float: 'right' }} className="close" onClick={this.onTransferCLose.bind(this, i)}>&times;</p></div>
                                                                     <label>Select Admin</label>
                                                                     <select className="format" value={typeof this.state.transferCloser[i] === "undefined" ? "Select" : this.state.transferCloser[i].transferCloser}
                                                                         onChange={(e) => {
@@ -897,8 +975,8 @@ class CallBack extends Component {
                                                                             this.setState({ transferCloser: this.state.transferCloser })
                                                                         }}>
                                                                         <option value="Select">Select</option>
-                                                                        {this.props.admins.map((v, i) => {
-                                                                            return <option key={i} value={JSON.stringify({ id: v.uid, name: v.username })} name={v.username}>{v.username}</option>
+                                                                        {this.state.admins.map((v, i) => {
+                                                                            return <option key={i} value={v.username} name={v.username}>{v.username}</option>
                                                                         })}
                                                                     </select>
                                                                     {typeof this.state.transferCloser[i] === "undefined" || this.state.transferCloser[i].transferCloser === "Select" ?
@@ -910,7 +988,7 @@ class CallBack extends Component {
                                                                         </div>
                                                                     }
                                                                     <br />
-                                                                    <Button size="sm" color={'success'} style={{ padding: 6, marginTop: 2 }} onClick={() => this.saleTransfer(this.state.transferCloser[i], i)}><i className="fa fa-exchange"></i>{" "} Transfer</Button>
+                                                                    <Button size="sm" color={'success'} style={{ padding: 6, marginTop: 2 }} onClick={() => this.saleTransfer(this.state.admins[i], v._id,i)}><i className="fa fa-exchange"></i>{" "} Transfer</Button>
                                                                     <div style={{ textAlign: "center", display: this.state.transferErrorDisplay }}><span style={{ color: "red" }}>{this.state.transferErrorMessage}</span></div>
                                                                 </div>
                                                             </div>

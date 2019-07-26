@@ -80,23 +80,40 @@ const saleSchema = new mongoose.Schema(
     },
     MonthlyRentMortgage: { type: Number },
     AgentId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,//when you use in axios  wrapp this id in  ObjectId()
       required: false, // this would be true 
       ref: "User"
     },
-    _Closer: {
-      type: mongoose.Schema.Types.ObjectId,
+    CloserId: {
+      type: mongoose.Schema.Types.ObjectId,//when you use in axios  wrapp this id in  ObjectId()
       required: false, // this would be true 
       ref: "User"
     },
-    _SaleStatus: {
-      type: mongoose.Schema.Types.ObjectId,
+    AdminId: {
+      type: mongoose.Schema.Types.ObjectId,//when you use in axios  wrapp this id in  ObjectId()
       required: false, // this would be true 
-      ref: "SaleStatus"
+      ref: "User"
     },
-    _TransferBy:{
-      type:String
-    }
+    CloserStatus:  {
+      type: String,
+      enum: ['Transfer','Pending','Approved',"Kick Back",'Rejected','Charged Back','Call Back'],
+      default: "Pending"
+    },
+    AgentStatus:  {
+      type: String,
+      enum: ['Transfer','Pending','Approved',"Kick Back",'Rejected','Charged Back','Call Back'],
+      default: "Pending"
+    },
+    AdminStatus:  {
+      type: String,
+      enum: ['Transfer','Pending','Approved',"Kick Back",'Rejected','Charged Back','Call Back'],
+      default: "Pending"
+    },
+    CloserNotes:{
+      type: String
+    },
+    AgentNotes: String
+
   },
   { timestamps: true }
 );

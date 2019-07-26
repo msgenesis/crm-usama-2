@@ -22,17 +22,38 @@ function ensureAuth(req,res,next){
 //   console.log(ip)
 // })
 
-
+router.patch("/KickBack/:id", async (req, res) => {
+ 
+    const {CloserStatus,Status, AgentId,CloserId} = req.body
+   
+  try {
+    const sale = await Sale.findByIdAndUpdate(req.params.id, { CloserStatus, CloserId,Status ,AgentId});
+    
+    console.log(sale)
+    res.send(sale);
+  } catch (e) {
+    console.log(e)
+    res.status(400).send(e);
+  }
+});
 
 router.get('/all-user', async (req ,res) =>{
   try{
-    const users = await User.find({})
+    const users = await User.find({ })
       res.send(users)
 } catch (e){
     res.status(500).send(e)
 }
 })
 
+router.get('/Users/:role', async (req ,res) =>{
+  try{
+    const users = await User.find({role: req.params.role}).select({_id:1, username:1})
+      res.send(users)
+} catch (e){
+    res.status(500).send(e)
+}
+})
 
 router.get("/all-sales", async (req, res) => {
   try {
@@ -131,6 +152,29 @@ router.get('/getUser',(req, res , next)=>{
 
 })
 
+
+router.post('/AuthUser',(req, res , next)=>{
+  const user = new User(req.user)
+  console.log("My user",req.body)
+  // res.send(user)
+  user.checkPassword(req.body.transferPassword, function(err, isMatch) {
+    // if (err) {
+    //   console.log( "why this error",err)
+    //    res.send(err);
+    //    return
+    // }
+    console.log(err, "is Match", isMatch);
+    if (isMatch) {
+      res.send(user);
+    } else {
+        res.status(400).send({
+        message: "Username or password is incorrect"
+      });
+    }
+  });
+
+
+})
 router.get('/adminInquire',(req,res,next)=>{ // ensureAuth
     Sale.count({},function(err,totalSale){
       // var month=new Date().getMonth()+1, day=new Date().getDay(),year=new Date().getFullYear();

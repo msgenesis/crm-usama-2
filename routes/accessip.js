@@ -1,3 +1,4 @@
+const Sale =require('../models/sale')
 const express = require("express");
 const AccessIp = require("../models/accessIp");
 const router = new express.Router();
@@ -54,7 +55,7 @@ router.patch("/accessIp/:id", async (req, res) => {
   }
 
   try {
-    await AccessIp.findByIdAndUpdate(req.params.id, { ip: req.body.ip });
+    const accessIp = await AccessIp.findByIdAndUpdate(req.params.id, { ip: req.body.ip });
     // const user = await User.findByIdAndUpdate(req.params.id,req.body,{ new:true , runValidators:true})
 
     res.send(accessIp);
@@ -62,5 +63,20 @@ router.patch("/accessIp/:id", async (req, res) => {
     res.status(400).send(e);
   }
 });
+
+router.patch("/Transfer/:id", async (req, res) => {
+  const {Status ,AdminStatus,CloserStatus , AdminId} = req.body
+   
+  try {
+    const sale = await Sale.findByIdAndUpdate(req.params.id, { CloserStatus, AdminStatus,Status , AdminId});
+    
+    console.log(sale)
+    res.send(sale);
+  } catch (e) {
+    console.log(e)
+    res.status(400).send(e);
+  }
+});
+
 
 module.exports = router;
